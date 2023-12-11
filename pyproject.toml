@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "autodoc-test-wb"
+version = "0.1.0"
+description = "Test Web Service by Autodoc"
+authors = ["kasuma99"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
