@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  db_autodoc:
+    container_name: db_autodoc
+    image: postgres:16.1-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: db_autodoc
+      POSTGRES_USER: user_autodoc
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
