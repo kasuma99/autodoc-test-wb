@@ -24,7 +24,7 @@ class AppConfig(BaseSettings):
 
 
 def _get_config():
-    return AppConfig(_env_nested_delimiter='__')
+    return AppConfig(_env_nested_delimiter="__")
 
 
 @cache
