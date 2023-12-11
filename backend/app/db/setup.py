@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
+
+from app.config import DbConfig, get_config
 
 SessionLocal = sessionmaker()
 
