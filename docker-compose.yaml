@@ -1,18 +1,28 @@
-version: '3'
+version: '3.8'
 
 services:
   db:
-    container_name: db_autodoc
+    container_name: db-autodoc
     image: postgres:16.1-alpine
     ports:
-      - '5437:5432'
+      - '5431:5432'
     env_file:
       - .env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   app:
-    container_name: fastapi_app
+    container_name: fastapi-app
     build:
       context: .
     env_file:
@@ -25,4 +35,4 @@ services:
 
 
 volumes:
-  postgres_data:
+  postgres-data:
