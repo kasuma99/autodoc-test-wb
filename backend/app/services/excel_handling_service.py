@@ -17,7 +17,7 @@ class ExcelHandlingService:
     def __init__(self, repo: ExcelHandlingLogRepo):
         self._repo = repo
 
-    def get_log(self, uuid: UUID) -> ExcelHandlingLog:
+    def get_log(self, uuid: UUID | str) -> ExcelHandlingLog:
         pass
 
     def get_logs(self) -> list[ExcelHandlingLog]:
@@ -25,15 +25,15 @@ class ExcelHandlingService:
 
     def create_log(
         self,
-        uuid: UUID,
+        uuid: UUID | str,
         filename: str,
         status: str,
         log: str,
         error_type: str,
     ) -> ExcelHandlingLog:
-        handling_log = ...
+        pass
 
-    def delete_log(self, uuid: UUID) -> None:
+    def delete_log(self, uuid: UUID | str) -> None:
         pass
 
     def validate_excel_file_and_get_dataframe(
