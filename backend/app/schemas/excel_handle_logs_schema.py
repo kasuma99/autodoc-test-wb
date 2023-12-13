@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class ExcelHandlingLogSchema(BaseModel):
+class ExcelHandleLogSchema(BaseModel):
     uuid: UUID | str
     created_date: datetime
     filename: str

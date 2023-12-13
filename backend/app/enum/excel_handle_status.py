@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ExcelHandlingStatus(Enum):
+class ExcelHandleStatus(Enum):
     PROCESSING = "PROCESSING"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"

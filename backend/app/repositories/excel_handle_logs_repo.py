@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session, Query
 
-from app.db.models.excel_handling_logs import ExcelHandlingLog
+from app.db.models.excel_handle_logs import ExcelHandlingLog
 
 
-class ExcelHandlingLogRepo:
+class ExcelHandleLogRepo:
     def __init__(self, session: Session):
         self._session = session
         self._object = ExcelHandlingLog

@@ -3,24 +3,24 @@ from uuid import UUID
 
 import pandas as pd
 
-from app.db.models.excel_handling_logs import ExcelHandlingLog
+from app.db.models.excel_handle_logs import ExcelHandleLog
 from app.exceptions.content_type_exception import FileReadException
-from app.repositories.excel_handling_logs_repo import ExcelHandlingLogRepo
+from app.repositories.excel_handle_logs_repo import ExcelHandleLogRepo
 
 
-class ExcelHandlingService:
+class ExcelHandleService:
     EXCEL_CONTENT_TYPES = (
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
-    def __init__(self, repo: ExcelHandlingLogRepo):
+    def __init__(self, repo: ExcelHandleLogRepo):
         self._repo = repo
 
-    def get_log(self, uuid: UUID | str) -> ExcelHandlingLog:
+    def get_log(self, uuid: UUID | str) -> ExcelHandleLog:
         pass
 
-    def get_logs(self) -> list[ExcelHandlingLog]:
+    def get_logs(self) -> list[ExcelHandleLog]:
         pass
 
     def create_log(
@@ -30,7 +30,7 @@ class ExcelHandlingService:
         status: str,
         log: str,
         error_type: str,
-    ) -> ExcelHandlingLog:
+    ) -> ExcelHandleLog:
         pass
 
     def delete_log(self, uuid: UUID | str) -> None:

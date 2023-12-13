@@ -1,7 +1,6 @@
 from typing import BinaryIO
 
 from .celery_app import celery_app
-from ..services.excel_handling_service import ExcelHandlingService
 
 
 @celery_app.task

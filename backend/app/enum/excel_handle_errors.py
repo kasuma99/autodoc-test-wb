@@ -1,5 +1,5 @@
 from enum import Enum
 
 
-class ExcelHandlingError(Enum):
+class ExcelHandleError(Enum):
     pass
