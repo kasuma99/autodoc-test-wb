@@ -9,8 +9,9 @@ def connect_routers(fastapi_app: FastAPI, routers_folder: str = "routers"):
     """
     Automatically includes all routers from the specified folder into the FastAPI app.
 
-    :param fastapi_app: The FastAPI application instance.
-    :param routers_folder: The folder containing router modules.
+    Args:
+        fastapi_app (FastAPI): The FastAPI application instance.
+        routers_folder (str): The folder containing router modules.
     """
     routers_dir = Path(routers_folder)
     if not routers_dir.is_dir():
@@ -28,16 +29,12 @@ def connect_routers(fastapi_app: FastAPI, routers_folder: str = "routers"):
                 router_module = import_module(module_path)
 
                 if hasattr(router_module, "router"):
-                    print("1")
                     fastapi_app.include_router(router_module.router)
             except Exception as e:
                 print(f"Error importing {module_path}: {e}")
 
 
-if __name__ == "__main__":
-    app = FastAPI()
+app = FastAPI()
 
-    # Connect all routers from folder routers
-    connect_routers(fastapi_app=app)
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Connect all routers
+connect_routers(fastapi_app=app)

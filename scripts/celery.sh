@@ -2,4 +2,4 @@
 
 cd backend/scripts || exit
 
-python start_app.py
+python start_celery.py

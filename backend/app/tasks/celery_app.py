@@ -8,7 +8,7 @@ def configure_redis_url() -> str:
     if redis_config is None:
         raise RuntimeError("Redis connection configuration is undefined")
 
-    broker_url = f"{redis_config.host}://redis:{redis_config.port}/{redis_config.db}"
+    broker_url = f"redis://{redis_config.host}:{redis_config.port}/{redis_config.db}"
     return broker_url
 
 
