@@ -1,5 +1,4 @@
-from fastapi import APIRouter, status
-
+from fastapi import APIRouter, status, UploadFile
 
 router = APIRouter(
     prefix="/excel",
@@ -13,7 +12,7 @@ router = APIRouter(
     status_code=status.HTTP_202_ACCEPTED,
 )
 async def upload_file_to_process(
-    excel_file: ...,
+    excel_file: UploadFile,
 ):
     # upload Excel file and send it to celery worker
     pass
