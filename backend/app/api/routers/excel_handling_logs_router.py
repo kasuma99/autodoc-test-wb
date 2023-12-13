@@ -13,6 +13,6 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 async def get_handling_log(
-        uuid: str,
+    uuid: str,
 ):
     pass
