@@ -7,6 +7,18 @@ router = APIRouter(
 )
 
 
+@router.post(
+    path="",
+    response_model=...,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def upload_file_to_process(
+    excel_file: ...,
+):
+    # upload Excel file and send it to celery worker
+    pass
+
+
 @router.get(
     path="/{uuid}",
     response_model=...,
@@ -19,13 +31,10 @@ async def get_processed_file(
     pass
 
 
-@router.post(
-    path="",
+@router.get(
+    path="/check_status/{uuid}",
     response_model=...,
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_200_OK,
 )
-async def upload_file_to_process(
-    excel_file: ...,
-):
-    # upload Excel file and send it to celery worker
+async def check_processing_status():
     pass
