@@ -16,4 +16,4 @@ class ExcelHandlingLog(Base):
     filename = Column(String, nullable=False)
     status = Column(Enum(ExcelHandlingStatus))
     log = Column(String, nullable=False)
-    type = Column(Enum(ExcelHandlingError))
+    error_type = Column(Enum(ExcelHandlingError))
