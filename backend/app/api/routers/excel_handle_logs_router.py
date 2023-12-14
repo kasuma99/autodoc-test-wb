@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends
 
 from app.api.dependencies.excel_handle_service_dependency import (
     get_excel_handling_service,

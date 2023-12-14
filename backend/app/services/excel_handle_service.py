@@ -175,6 +175,7 @@ class ExcelHandleService:
                 log=log.log,
                 error_type=log.error_type,
             )
+            return
 
         try:
             dataframe = pd.read_excel(file)

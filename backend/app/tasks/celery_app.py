@@ -1,9 +1,11 @@
+import traceback
 from typing import BinaryIO
 
 from celery import Celery
 
 from app.config import get_config
 from app.db.session import create_db_session
+from app.db.setup import db_setup
 from app.repositories.excel_handle_logs_repo import ExcelHandleLogRepo
 from app.services.excel_handle_service import ExcelHandleService
 
@@ -20,6 +22,7 @@ def configure_redis_url() -> str:
 redis_url = configure_redis_url()
 
 celery_app = Celery(main="worker", broker=redis_url, backend=redis_url)
+db_setup()
 
 
 @celery_app.task
@@ -39,6 +42,11 @@ def process_excel_file_task(
             content_type=content_type,
             file=file,
         )
+        session.commit()
+
+    except Exception as e:
+        traceback.print_exc()
+        session.rollback()
 
     finally:
         session.close()

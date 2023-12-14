@@ -22,7 +22,8 @@ class ExcelHandleLogRepo:
 
     def create(self, model: ExcelHandleLog) -> ExcelHandleLog:
         self._session.add(model)
-        self._session.flush()
+        self._session.commit()
+        self._session.refresh(model)
         return model
 
     def delete(self, model: ExcelHandleLog | None) -> None:
