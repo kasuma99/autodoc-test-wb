@@ -3,7 +3,7 @@ from sqlalchemy.future import Engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import DbConfig, get_config
-from app.db import Base
+from app.db.models import Base
 
 SessionLocal = sessionmaker()
 

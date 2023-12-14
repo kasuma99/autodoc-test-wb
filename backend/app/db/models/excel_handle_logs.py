@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, String, Enum
 from sqlalchemy_utils import UUIDType
 
-from app.db import Base
+from app.db.models import Base
 from app.enum.excel_handle_errors import ExcelHandleError
 from app.enum.excel_handle_status import ExcelHandleStatus
 

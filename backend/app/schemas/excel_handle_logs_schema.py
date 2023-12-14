@@ -11,3 +11,6 @@ class ExcelHandleLogSchema(BaseModel):
     status: str
     log: str
     error_type: str
+
+    class Config:
+        orm_mode = True
