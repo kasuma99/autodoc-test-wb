@@ -24,13 +24,13 @@ async def get_log(
     """
     Retrieves the processing log for an Excel file handling task based on the given task ID.
 
-    Args:
+    Parameters:
         task_id (str): The unique identifier of the background task for which the logs are requested.
         service (ExcelHandleService): The service responsible for handling Excel file
                                       operations, injected through dependency injection.
 
     Returns:
-        ExcelHandleLogSchema: A Pydantic model containing the detailed logs of the specified task.
+        ExcelHandleLogSchema: A Pydantic model containing the detailed log of the specified task.
     """
     excel_log = service.get_log(uuid=task_id)
     if excel_log is None:
@@ -50,5 +50,15 @@ async def get_log(
 async def get_logs(
     service: ExcelHandleService = Depends(get_excel_handling_service),
 ):
+    """
+    Retrieves all the processing logs for an Excel file handling task.
+
+    Parameters:
+        service (ExcelHandleService): The service responsible for handling Excel file
+                                      operations, injected through dependency injection.
+
+    Returns:
+        list[ExcelHandleLogSchema]: A list of Pydantic models containing the detailed log of the specified task.
+    """
     excel_logs = service.get_logs()
     return excel_logs
