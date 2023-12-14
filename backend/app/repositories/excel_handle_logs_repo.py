@@ -14,7 +14,7 @@ class ExcelHandleLogRepo:
     def _query(self) -> Query:
         return self._session.query(self._object)
 
-    def get(self, uuid: UUID) -> ExcelHandleLog:
+    def get(self, uuid: UUID) -> ExcelHandleLog | None:
         return self._query().filter(self._object.uuid == uuid).first()
 
     def get_all(self, order_by="created_date", desc=True) -> list[ExcelHandleLog]:
@@ -26,5 +26,5 @@ class ExcelHandleLogRepo:
         return model
 
     def delete(self, model: ExcelHandleLog | None) -> None:
-        if model:
+        if model is not None:
             self._session.delete(model)

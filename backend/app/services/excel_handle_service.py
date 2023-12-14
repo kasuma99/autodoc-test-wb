@@ -10,7 +10,9 @@ from app.config import get_config
 from app.db.models.excel_handle_logs import ExcelHandleLog
 from app.enum.excel_handle_errors import ExcelHandleError
 from app.enum.excel_handle_status import ExcelHandleStatus
+from app.exceptions.not_found_exception import NotFoundException
 from app.repositories.excel_handle_logs_repo import ExcelHandleLogRepo
+from app.utils.validate_uuid_format import validate_uuid_format
 
 
 class ExcelHandleService:
@@ -27,10 +29,15 @@ class ExcelHandleService:
         self._repo = repo
         self._config = get_config()
 
-    def get_log(self, uuid: UUID | str) -> ExcelHandleLog | None:
-        if isinstance(uuid, str):
-            uuid = UUID(uuid)
-        return self._repo.get(uuid=uuid)
+    def get_log(self, uuid: UUID | str) -> ExcelHandleLog:
+        uuid = validate_uuid_format(string=uuid)
+
+        excel_handle_log = self._repo.get(uuid=uuid)
+        if excel_handle_log is None:
+            raise NotFoundException(
+                message=f"ExcelHandleLog record with uuid={uuid} not found"
+            )
+        return excel_handle_log
 
     def get_logs(self) -> list[ExcelHandleLog]:
         return self._repo.get_all()
@@ -43,8 +50,7 @@ class ExcelHandleService:
         log: str,
         error_type: str,
     ) -> ExcelHandleLog:
-        if isinstance(uuid, str):
-            uuid = UUID(uuid)
+        uuid = validate_uuid_format(string=uuid)
         excel_handle_log = self._repo.create(
             model=ExcelHandleLog(
                 uuid=uuid,
@@ -58,9 +64,8 @@ class ExcelHandleService:
         return excel_handle_log
 
     def delete_log(self, uuid: UUID | str) -> None:
-        if isinstance(uuid, str):
-            uuid = UUID(uuid)
-        excel_handle_log = self.get_log(uuid=uuid)
+        uuid = validate_uuid_format(string=uuid)
+        excel_handle_log = self._repo.get(uuid=uuid)
         self._repo.delete(model=excel_handle_log)
 
     def validate_excel_file_and_get_dataframe(

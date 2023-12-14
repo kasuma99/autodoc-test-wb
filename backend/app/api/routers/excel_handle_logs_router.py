@@ -32,13 +32,8 @@ async def get_log(
     Returns:
         ExcelHandleLogSchema: A Pydantic model containing the detailed log of the specified task.
     """
+
     excel_log = service.get_log(uuid=task_id)
-    if excel_log is None:
-        # Better way is to use Custom Exceptions and connect them to fastapi app.
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ExcelHandleLog record with uuid={task_id} not found",
-        )
     return excel_log
 
 
