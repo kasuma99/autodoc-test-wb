@@ -7,7 +7,7 @@ services:
     ports:
       - "5431:5432"
     env_file:
-      - .env
+      - .env.docker
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -17,7 +17,7 @@ services:
     ports:
       - "80:80"
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       - db
 
@@ -32,7 +32,7 @@ services:
     build:
       context: .
     env_file:
-      - .env
+      - .env.docker
     command: ["/app/scripts/celery.sh"]
     depends_on:
       - redis
@@ -41,7 +41,7 @@ services:
     container_name: flower-app
     image: mher/flower
     env_file:
-      - .env
+      - .env.docker
     command: ["/app/scripts/flower.sh"]
     ports:
       - "5555:5555"
@@ -53,7 +53,7 @@ services:
     build:
       context: .
     env_file:
-      - .env
+      - .env.docker
     command: ["/app/scripts/app.sh"]
     ports:
       - "8000:8000"

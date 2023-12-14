@@ -14,8 +14,4 @@ def configure_redis_url() -> str:
 
 redis_url = configure_redis_url()
 
-celery_app = Celery(
-    main="worker",
-    broker="redis://localhost:6379/0 ",
-    backend="redis://localhost:6379/0 ",
-)
+celery_app = Celery(main="worker", broker=redis_url, backend=redis_url)
