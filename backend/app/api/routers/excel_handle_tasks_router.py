@@ -81,8 +81,6 @@ async def get_processed_file(
         FileResponse: A response object that represents the processed Excel file, allowing the client to download it.
         dict: A dictionary containing the 'task_id' and the 'message' of the background task.
     """
-    processed_file_path = f"processed_{task_id}.xlsx"
-
     # Check if task is completed using AsyncResult instance
     task_result = AsyncResult(task_id, app=celery_app)
     if task_result.status != "SUCCESS":
@@ -93,6 +91,7 @@ async def get_processed_file(
         }
 
     # Check if file exists that means the task is completed
+    processed_file_path = os.path.join(config.excel.folder_path, f"{task_id}.xlsx")
     if not os.path.exists(path=processed_file_path):
         return {
             "task_id": task_id,
@@ -100,10 +99,9 @@ async def get_processed_file(
             "message": "File processing error (check logs)",
         }
 
-    processed_file_path = os.path.join(config.excel.folder_path, f"{task_id}.xlsx")
     return FileResponse(
         processed_file_path,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        media_type=config.excel.mime_xlsx,
         filename=processed_file_path,
     )
 
