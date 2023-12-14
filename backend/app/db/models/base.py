@@ -1,2 +1,3 @@
-# This file is used to inform alembic about changes in db.models
-from . import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()

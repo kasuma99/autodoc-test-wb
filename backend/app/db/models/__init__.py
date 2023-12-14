@@ -1,3 +1,2 @@
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from .base import Base
+from .excel_handle_logs import ExcelHandleLog
