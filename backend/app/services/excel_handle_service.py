@@ -195,7 +195,7 @@ class ExcelHandleService:
             os.makedirs(processed_files_folder, exist_ok=True)
             # Save the updated data back to an Excel file
             dataframe.to_excel(
-                os.path.join(processed_files_folder, processed_file_path), index=False
+                os.path.join(processed_files_folder, processed_file_path)
             )
             # Create log for success processing Excel file
             self.create_log(
