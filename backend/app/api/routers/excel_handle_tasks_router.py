@@ -1,13 +1,16 @@
+import os
+
 from celery.result import AsyncResult
 from fastapi import APIRouter, status, UploadFile, Depends
+from starlette.responses import FileResponse
 
 from app.api.dependencies.task_id_depenency import get_task_id
-from app.schemas.celery_task_schema import CeleryTaskSchema
+from app.schemas.celery_task_schema import CeleryTaskSchema, CeleryTaskNoExcelSchema
 from app.tasks.celery_app import celery_app
 from app.tasks.process_excel_file import process_excel_file
 
 router = APIRouter(
-    prefix="/task",
+    prefix="/excel-task",
     tags=["Excel Files Process Tasks"],
 )
 
@@ -35,6 +38,7 @@ async def upload_file_to_process(
     task = process_excel_file.apply_async(
         args=[
             task_id,
+            upload_file.filename,
             upload_file.content_type,
             upload_file.file,
         ],
@@ -47,19 +51,54 @@ async def upload_file_to_process(
 
 
 @router.get(
-    path="/{task_id}",
-    response_model=CeleryTaskSchema,
+    path="/download/{task_id}",
+    response_model=CeleryTaskNoExcelSchema | FileResponse,
     status_code=status.HTTP_200_OK,
 )
 async def get_processed_file(
     task_id: str,
 ):
-    # return processed Excel file if it was processed, else ...
-    pass
+    """
+    Endpoint to download a processed Excel file using a given task ID.
+
+    Args:
+        task_id (str): The unique identifier for the task associated with the Excel file processing.
+
+    Returns:
+        FileResponse: A response object that represents the processed Excel file, allowing the client to download it.
+        dict: A dictionary containing the 'task_id' and the 'message' of the background task.
+    """
+    processed_file_path = f"processed_{task_id}.xlsx"
+
+    # Check if task is completed using AsyncResult instance
+    task_result = AsyncResult(task_id, app=celery_app)
+    if task_result.status != "SUCCESS":
+        return {
+            "task_id": task_id,
+            "status": task_result.status,
+            "message": "File processing is not completed",
+        }
+
+    # Check if file exists that means the task is completed
+    if not os.path.exists(path=processed_file_path):
+        return {
+            "task_id": task_id,
+            "status": task_result.status,
+            "message": "File processing error (check logs) or task ID is invalid",
+        }
+
+    processed_file_path = os.path.join(
+        "processed_excel_files", f"processed_{task_id}.xlsx"
+    )
+    return FileResponse(
+        processed_file_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=processed_file_path,
+    )
 
 
 @router.get(
-    path="/check_status/{task_id}",
+    path="/status/{task_id}",
     response_model=CeleryTaskSchema,
     status_code=status.HTTP_200_OK,
 )

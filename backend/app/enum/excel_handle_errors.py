@@ -2,4 +2,10 @@ from enum import Enum
 
 
 class ExcelHandleError(Enum):
-    pass
+    EMPTY = "EMPTY"
+    UNSUPPORTED_TYPE = "UNSUPPORTED_TYPE"
+    PANDAS_RELATED = "PANDAS-RELATED"
+    INVALID_COLUMNS = "INVALID_COLUMNS"
+    INVALID_DATA = "INVALID DATA"
+    OTHER = "OTHER"
+    NONE = "NONE"
