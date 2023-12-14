@@ -36,19 +36,8 @@ services:
     command: ["/app/scripts/celery.sh"]
     depends_on:
       - redis
-
-  flower:
-    container_name: flower-app
-    build:
-      context: .
-    env_file:
-      - .env.docker
-    command: ["/app/scripts/flower.sh"]
-    ports:
-      - "5555:5555"
-    depends_on:
-      - redis
-      - worker
+    volumes:
+      - shared-volume:/app/backend/app/data
 
   app:
     container_name: fastapi-app
@@ -63,7 +52,23 @@ services:
       - db
       - redis
       - worker
+    volumes:
+      - shared-volume:/app/backend/app/data
+
+  flower:
+    container_name: flower-app
+    build:
+      context: .
+    env_file:
+      - .env.docker
+    command: ["/app/scripts/flower.sh"]
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - worker
 
 
 volumes:
   postgres-data:
+  shared-volume:
