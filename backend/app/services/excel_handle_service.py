@@ -12,6 +12,7 @@ from app.enum.excel_handle_errors import ExcelHandleError
 from app.enum.excel_handle_status import ExcelHandleStatus
 from app.exceptions.not_found_exception import NotFoundException
 from app.repositories.excel_handle_logs_repo import ExcelHandleLogRepo
+from app.utils.excel_handle_log_dataclass import LogMinor
 from app.utils.validate_uuid_format import validate_uuid_format
 
 
@@ -68,110 +69,99 @@ class ExcelHandleService:
         excel_handle_log = self._repo.get(uuid=uuid)
         self._repo.delete(model=excel_handle_log)
 
-    def validate_excel_file_and_get_dataframe(
-        self,
-        task_id: str,
-        filename: str,
-        content_type: str,
-        file: BinaryIO,
-    ) -> pd.DataFrame | None:
-        # Catch error when uploaded file is not an Excel file and create log
+    # Validation methods:
+
+    def get_log_invalid_content_type(self, content_type: str) -> LogMinor | None:
+        # Catch error when uploaded file is not an Excel file
         if content_type not in self.EXCEL_CONTENT_TYPES:
-            self.create_log(
-                uuid=task_id,
-                filename=filename,
+            log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
-                log="The Excel file is empty",
+                log=f"Unsupported file extension: {content_type}",
                 error_type=ExcelHandleError.UNSUPPORTED_TYPE.value,
             )
-            return None
+            return log
+
+    def get_log_unreadable(self, file: BinaryIO) -> LogMinor | None:
         try:
             dataframe = pd.read_excel(file)
+            # Catch error when uploaded file is not an Excel file
             if dataframe.empty:
-                # Catch error when empty Excel file has been uploaded and create log
-                self.create_log(
-                    uuid=task_id,
-                    filename=filename,
+                log = LogMinor(
                     status=ExcelHandleStatus.FAILED.value,
                     log="The Excel file is empty",
-                    error_type=ExcelHandleError.EMPTY.value,
+                    error_type=ExcelHandleError.UNSUPPORTED_TYPE.value,
                 )
-                return None
+                return log
 
+        # Catch other pandas-related errors
         except Exception as e:
-            # Catch other pandas-related errors (e.g., invalid file format)
-            self.create_log(
-                uuid=task_id,
-                filename=filename,
+            log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
                 log=traceback.format_exc(),
                 error_type=ExcelHandleError.PANDAS_RELATED.value,
             )
-            return None
+            return log
 
-        return dataframe
-
-    def is_valid_dataframe_columns(
-        self,
-        dataframe: pd.DataFrame,
-        task_id: str,
-        filename: str,
-    ) -> bool:
-        # Catch error when columns are not match with 'EXPECTED COLUMNS'
-        if len(dataframe.columns) != len(self.EXPECTED_COLUMNS) or not all(
-            dataframe.columns == self.EXPECTED_COLUMNS
-        ):
-            self.create_log(
-                uuid=task_id,
-                filename=filename,
+    def get_log_invalid_columns(self, columns: list) -> LogMinor | None:
+        # Catch error when columns are not match with EXPECTED COLUMNS
+        if not columns == self.EXPECTED_COLUMNS:
+            log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
                 log=f"File's columns do not match with: {self.EXPECTED_COLUMNS}",
                 error_type=ExcelHandleError.INVALID_COLUMNS.value,
             )
-            return False
+            return log
 
-        return True
-
-    def is_valid_date(
-        self,
-        date: Any,
-        index: int,
-        task_id: str,
-        filename: str,
-    ):
+    def get_log_invalid_date(self, date: Any, index: int) -> LogMinor | None:
         try:
             # Catch error when data in Date column is not a valid type
             pd.to_datetime(date, format="%Y-%m-%d")
-            return True
+
         except ValueError:
-            self.create_log(
-                uuid=task_id,
-                filename=filename,
+            log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
-                log=f"Invalid date format in row: {index + 1}",
+                log=f"Invalid date format in row: {index + 1}: {date}",
                 error_type=ExcelHandleError.INVALID_DATA.value,
             )
-            return False
+            return log
 
-    def is_valid_sales(
-        self,
-        sales: Any,
-        index: int,
-        task_id: str,
-        filename: str,
-    ):
-        # Check if data in Date column is either None or float, int
-        if pd.isna(sales) or isinstance(sales, (int, float)):
-            return True
+    def get_log_invalid_sales(self, sales: Any, index: int) -> LogMinor | None:
+        # Check if data in Date column is either None or float | int
+        if not pd.isna(sales) and not isinstance(sales, (int, float)):
+            log = LogMinor(
+                status=ExcelHandleStatus.FAILED.value,
+                log=f"Invalid sales format in row: {index + 1}",
+                error_type=ExcelHandleError.INVALID_DATA.value,
+            )
+            return log
 
-        self.create_log(
-            uuid=task_id,
-            filename=filename,
-            status=ExcelHandleStatus.FAILED.value,
-            log=f"Invalid sales format in row: {index + 1}",
-            error_type=ExcelHandleError.INVALID_DATA.value,
-        )
-        return False
+    def validate_and_get_log(self, content_type: str, file: BinaryIO) -> LogMinor | None:
+        # Pass all validation functions
+        log = self.get_log_invalid_content_type(content_type=content_type)
+        if log:
+            return log
+
+        log = self.get_log_unreadable(file=file)
+        if log:
+            return log
+
+        dataframe = pd.read_excel(file)
+        log = self.get_log_invalid_columns(columns=list(dataframe.columns))
+        if log:
+            return log
+
+        for index, row in dataframe.iterrows():
+            log = self.get_log_invalid_date(
+                date=row[self.EXPECTED_COLUMNS[0]], index=int(index)
+            )
+            if log:
+                return log
+
+            log = self.get_log_invalid_sales(
+                sales=row[self.EXPECTED_COLUMNS[1]], index=int(index)
+            )
+            if log:
+                return log
 
     def process_file(
         self,
@@ -180,40 +170,19 @@ class ExcelHandleService:
         content_type: str,
         file: BinaryIO,
     ) -> None:
-        # Get dataframe and pass all validation functions
-        dataframe = self.validate_excel_file_and_get_dataframe(
-            task_id=task_id,
-            filename=filename,
-            content_type=content_type,
-            file=file,
-        )
-        if not dataframe:
-            return
-
-        if not self.is_valid_dataframe_columns(
-            dataframe=dataframe,
-            task_id=task_id,
-            filename=filename,
-        ):
-            return
-
-        for index, row in dataframe.iterrows():
-            if not self.is_valid_date(
-                date=row[self.EXPECTED_COLUMNS[0]],
-                index=int(index),
-                task_id=task_id,
+        # validate Excel file by all validators
+        log = self.validate_and_get_log(content_type=content_type, file=file)
+        if log:
+            self.create_log(
+                uuid=task_id,
                 filename=filename,
-            ):
-                return
-            if not self.is_valid_sales(
-                sales=row[self.EXPECTED_COLUMNS[1]],
-                index=int(index),
-                task_id=task_id,
-                filename=filename,
-            ):
-                return
+                status=log.status,
+                log=log.log,
+                error_type=log.error_type,
+            )
 
         try:
+            dataframe = pd.read_excel(file)
             # Convert the 'Date' column to a datetime format
             dataframe["Date"] = pd.to_datetime(dataframe["Date"])
 
@@ -231,7 +200,7 @@ class ExcelHandleService:
             dataframe.to_excel(
                 os.path.join(processed_files_folder, processed_file_path), index=False
             )
-            # Create log for success processing
+            # Create log for success processing Excel file
             self.create_log(
                 uuid=task_id,
                 filename=filename,
