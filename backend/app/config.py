@@ -25,6 +25,10 @@ class RedisConfig(BaseSettings):
 
 class ExcelConfig(BaseSettings):
     folder_path: str
+    mime_xlsx: str
+    mime_xls: str
+    column_date: str
+    column_sales: str
 
 
 class AppConfig(BaseConfig):

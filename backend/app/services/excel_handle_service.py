@@ -17,18 +17,11 @@ from app.utils.validate_uuid_format import validate_uuid_format
 
 
 class ExcelHandleService:
-    EXCEL_CONTENT_TYPES = [
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ]
-    EXPECTED_COLUMNS = [
-        "Date",
-        "Sales",
-    ]
-
     def __init__(self, repo: ExcelHandleLogRepo):
         self._repo = repo
-        self._config = get_config()
+        self._config = get_config().excel
+        self._status = ExcelHandleStatus
+        self._error = ExcelHandleError
 
     def get_log(self, uuid: UUID | str) -> ExcelHandleLog:
         uuid = validate_uuid_format(string=uuid)
@@ -73,11 +66,11 @@ class ExcelHandleService:
 
     def get_log_invalid_content_type(self, content_type: str) -> LogMinor | None:
         # Catch error when uploaded file is not an Excel file
-        if content_type not in self.EXCEL_CONTENT_TYPES:
+        if content_type not in [self._config.mime_xls, self._config.mime_xlsx]:
             log = LogMinor(
-                status=ExcelHandleStatus.FAILED.value,
+                status=self._status.FAILED.value,
                 log=f"Unsupported file extension: {content_type}",
-                error_type=ExcelHandleError.UNSUPPORTED_TYPE.value,
+                error_type=self._error.UNSUPPORTED_TYPE.value,
             )
             return log
 
@@ -87,14 +80,14 @@ class ExcelHandleService:
             # Catch error when uploaded file is not an Excel file
             if dataframe.empty:
                 log = LogMinor(
-                    status=ExcelHandleStatus.FAILED.value,
+                    status=self._status.FAILED.value,
                     log="The Excel file is empty",
-                    error_type=ExcelHandleError.UNSUPPORTED_TYPE.value,
+                    error_type=self._error.UNSUPPORTED_TYPE.value,
                 )
                 return log
 
         # Catch other pandas-related errors
-        except Exception as e:
+        except Exception:
             log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
                 log=traceback.format_exc(),
@@ -104,10 +97,10 @@ class ExcelHandleService:
 
     def get_log_invalid_columns(self, columns: list) -> LogMinor | None:
         # Catch error when columns are not match with EXPECTED COLUMNS
-        if not columns == self.EXPECTED_COLUMNS:
+        if not columns == [self._config.column_date, self._config.column_sales]:
             log = LogMinor(
                 status=ExcelHandleStatus.FAILED.value,
-                log=f"File's columns do not match with: {self.EXPECTED_COLUMNS}",
+                log=f"File's columns do not match with: {self._config.column_date}, {self._config.column_sales}",
                 error_type=ExcelHandleError.INVALID_COLUMNS.value,
             )
             return log
@@ -119,9 +112,9 @@ class ExcelHandleService:
 
         except ValueError:
             log = LogMinor(
-                status=ExcelHandleStatus.FAILED.value,
+                status=self._status.FAILED.value,
                 log=f"Invalid date format in row: {index + 1}: {date}",
-                error_type=ExcelHandleError.INVALID_DATA.value,
+                error_type=self._error.INVALID_DATA.value,
             )
             return log
 
@@ -129,13 +122,15 @@ class ExcelHandleService:
         # Check if data in Date column is either None or float | int
         if not pd.isna(sales) and not isinstance(sales, (int, float)):
             log = LogMinor(
-                status=ExcelHandleStatus.FAILED.value,
+                status=self._status.FAILED.value,
                 log=f"Invalid sales format in row: {index + 1}",
-                error_type=ExcelHandleError.INVALID_DATA.value,
+                error_type=self._error.INVALID_DATA.value,
             )
             return log
 
-    def validate_and_get_log(self, content_type: str, file: BinaryIO) -> LogMinor | None:
+    def validate_and_get_log(
+        self, content_type: str, file: BinaryIO
+    ) -> LogMinor | None:
         # Pass all validation functions
         log = self.get_log_invalid_content_type(content_type=content_type)
         if log:
@@ -152,13 +147,13 @@ class ExcelHandleService:
 
         for index, row in dataframe.iterrows():
             log = self.get_log_invalid_date(
-                date=row[self.EXPECTED_COLUMNS[0]], index=int(index)
+                date=row[self._config.column_date], index=int(index)
             )
             if log:
                 return log
 
             log = self.get_log_invalid_sales(
-                sales=row[self.EXPECTED_COLUMNS[1]], index=int(index)
+                sales=row[self._config.column_sales], index=int(index)
             )
             if log:
                 return log
@@ -209,7 +204,7 @@ class ExcelHandleService:
                 error_type=ExcelHandleError.NONE.value,
             )
 
-        except Exception as e:
+        except Exception:
             self.create_log(
                 uuid=task_id,
                 filename=filename,
