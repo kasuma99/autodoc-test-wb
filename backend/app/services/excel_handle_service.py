@@ -188,9 +188,10 @@ class ExcelHandleService:
             # Linear interpolation is used here, assuming that the values change uniformly between the known data points
             dataframe["Sales"] = dataframe["Sales"].interpolate(method="linear")
 
-            processed_file_path = f"processed_{task_id}.xlsx"
-            processed_files_folder = self._config.excel.folder_path
-
+            processed_file_path = f"{task_id}.xlsx"
+            processed_files_folder = self._config.folder_path
+            # Create the directory if it does not exist
+            os.makedirs(processed_files_folder, exist_ok=True)
             # Save the updated data back to an Excel file
             dataframe.to_excel(
                 os.path.join(processed_files_folder, processed_file_path), index=False

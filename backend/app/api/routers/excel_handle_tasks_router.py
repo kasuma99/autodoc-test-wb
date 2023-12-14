@@ -13,7 +13,7 @@ from app.schemas.celery_task_schema import (
 )
 from app.tasks.celery_app import celery_app
 
-from app.tasks import process_excel_file
+from app.tasks.celery_app import process_excel_file_task
 
 router = APIRouter(
     prefix="/excel-task",
@@ -40,13 +40,18 @@ async def upload_file_to_process(
     Returns:
         dict: A dictionary containing the 'task_id' and the current 'status' of the background task.
     """
+    # Read the content of the file
+    # Content is loaded entirely into memory.
+    # If dealing with very large files, this might not be the most efficient solution...
+    file_content = await upload_file.read()
+
     # Dispatch the background task that processes uploaded file
-    task = process_excel_file.apply_async(
+    task = process_excel_file_task.apply_async(
         args=[
             task_id,
             upload_file.filename,
             upload_file.content_type,
-            upload_file.file,
+            file_content,
         ],
         task_id=task_id,
     )
@@ -84,7 +89,7 @@ async def get_processed_file(
         return {
             "task_id": task_id,
             "status": task_result.status,
-            "message": "File processing is not completed",
+            "message": "File processing is not completed or task ID is invalid",
         }
 
     # Check if file exists that means the task is completed
@@ -92,12 +97,10 @@ async def get_processed_file(
         return {
             "task_id": task_id,
             "status": task_result.status,
-            "message": "File processing error (check logs) or task ID is invalid",
+            "message": "File processing error (check logs)",
         }
 
-    processed_file_path = os.path.join(
-        config.excel.folder_path, f"processed_{task_id}.xlsx"
-    )
+    processed_file_path = os.path.join(config.excel.folder_path, f"{task_id}.xlsx")
     return FileResponse(
         processed_file_path,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

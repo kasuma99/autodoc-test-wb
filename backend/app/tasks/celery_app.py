@@ -1,6 +1,11 @@
+from typing import BinaryIO
+
 from celery import Celery
 
 from app.config import get_config
+from app.db.session import create_db_session
+from app.repositories.excel_handle_logs_repo import ExcelHandleLogRepo
+from app.services.excel_handle_service import ExcelHandleService
 
 
 def configure_redis_url() -> str:
@@ -15,3 +20,25 @@ def configure_redis_url() -> str:
 redis_url = configure_redis_url()
 
 celery_app = Celery(main="worker", broker=redis_url, backend=redis_url)
+
+
+@celery_app.task
+def process_excel_file_task(
+    task_id: str,
+    filename: str,
+    content_type: str,
+    file: BinaryIO,
+):
+    session = create_db_session()
+    try:
+        service = ExcelHandleService(repo=ExcelHandleLogRepo(session=session))
+
+        service.process_file(
+            task_id=task_id,
+            filename=filename,
+            content_type=content_type,
+            file=file,
+        )
+
+    finally:
+        session.close()
