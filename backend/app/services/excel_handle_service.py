@@ -24,11 +24,11 @@ class ExcelHandleService:
     def __init__(self, repo: ExcelHandleLogRepo):
         self._repo = repo
 
-    def get_log(self, uuid: UUID | str) -> ExcelHandleLog:
-        pass
+    def get_log(self, uuid: UUID | str) -> ExcelHandleLog | None:
+        return self._repo.get(uuid=uuid)
 
     def get_logs(self) -> list[ExcelHandleLog]:
-        pass
+        return self._repo.get_all()
 
     def create_log(
         self,
@@ -38,10 +38,20 @@ class ExcelHandleService:
         log: str,
         error_type: str,
     ) -> ExcelHandleLog:
-        pass
+        excel_handle_log = self._repo.create(
+            model=ExcelHandleLog(
+                uuid=uuid,
+                filename=filename,
+                status=status,
+                log=log,
+                error_type=error_type,
+            )
+        )
+        return excel_handle_log
 
     def delete_log(self, uuid: UUID | str) -> None:
-        pass
+        excel_handle_log = self.get_log(uuid=uuid)
+        self._repo.delete(model=excel_handle_log)
 
     def validate_excel_file_and_get_dataframe(
         self,
