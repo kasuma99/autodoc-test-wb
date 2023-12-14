@@ -1,13 +1,18 @@
 import os
+from typing import Optional
 
 from celery.result import AsyncResult
 from fastapi import APIRouter, status, UploadFile, Depends
 from starlette.responses import FileResponse
 
 from app.api.dependencies.task_id_depenency import get_task_id
-from app.schemas.celery_task_schema import CeleryTaskSchema, CeleryTaskNoExcelSchema
+from app.schemas.celery_task_schema import (
+    CeleryTaskSchema,
+    CeleryTaskNoExcelSchema,
+)
 from app.tasks.celery_app import celery_app
-from app.tasks.process_excel_file import process_excel_file
+
+from app.tasks import process_excel_file
 
 router = APIRouter(
     prefix="/excel-task",
@@ -52,7 +57,7 @@ async def upload_file_to_process(
 
 @router.get(
     path="/download/{task_id}",
-    response_model=CeleryTaskNoExcelSchema | FileResponse,
+    response_model=Optional[CeleryTaskNoExcelSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_processed_file(
