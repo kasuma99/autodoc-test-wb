@@ -5,7 +5,7 @@ services:
     container_name: db-app
     image: postgres:16.1-alpine
     ports:
-      - "5432:5432"
+      - "5431:5432"
     env_file:
       - .env.docker
     volumes:
@@ -39,7 +39,8 @@ services:
 
   flower:
     container_name: flower-app
-    image: mher/flower
+    build:
+      context: .
     env_file:
       - .env.docker
     command: ["/app/scripts/flower.sh"]
@@ -47,6 +48,7 @@ services:
       - "5555:5555"
     depends_on:
       - redis
+      - worker
 
   app:
     container_name: fastapi-app

@@ -6,6 +6,7 @@ from uuid import UUID
 
 import pandas as pd
 
+from app.config import get_config
 from app.db.models.excel_handle_logs import ExcelHandleLog
 from app.enum.excel_handle_errors import ExcelHandleError
 from app.enum.excel_handle_status import ExcelHandleStatus
@@ -24,8 +25,11 @@ class ExcelHandleService:
 
     def __init__(self, repo: ExcelHandleLogRepo):
         self._repo = repo
+        self._config = get_config()
 
     def get_log(self, uuid: UUID | str) -> ExcelHandleLog | None:
+        if isinstance(uuid, str):
+            uuid = UUID(uuid)
         return self._repo.get(uuid=uuid)
 
     def get_logs(self) -> list[ExcelHandleLog]:
@@ -39,6 +43,8 @@ class ExcelHandleService:
         log: str,
         error_type: str,
     ) -> ExcelHandleLog:
+        if isinstance(uuid, str):
+            uuid = UUID(uuid)
         excel_handle_log = self._repo.create(
             model=ExcelHandleLog(
                 uuid=uuid,
@@ -52,6 +58,8 @@ class ExcelHandleService:
         return excel_handle_log
 
     def delete_log(self, uuid: UUID | str) -> None:
+        if isinstance(uuid, str):
+            uuid = UUID(uuid)
         excel_handle_log = self.get_log(uuid=uuid)
         self._repo.delete(model=excel_handle_log)
 
@@ -212,7 +220,7 @@ class ExcelHandleService:
             dataframe["Sales"] = dataframe["Sales"].interpolate(method="linear")
 
             processed_file_path = f"processed_{task_id}.xlsx"
-            processed_files_folder = "processed_excel_files"
+            processed_files_folder = self._config.excel.folder_path
 
             # Save the updated data back to an Excel file
             dataframe.to_excel(

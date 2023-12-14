@@ -23,9 +23,14 @@ class RedisConfig(BaseSettings):
     db: int = 0
 
 
+class ExcelConfig(BaseSettings):
+    folder_path: str
+
+
 class AppConfig(BaseConfig):
     db: DbConfig | None
     redis: RedisConfig | None
+    excel: ExcelConfig | None
 
 
 @cache

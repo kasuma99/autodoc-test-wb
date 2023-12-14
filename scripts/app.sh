@@ -2,6 +2,6 @@
 
 cd backend || exit
 
-alembic uprade head
+alembic upgrade head
 
 python start_app.py

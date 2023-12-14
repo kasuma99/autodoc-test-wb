@@ -6,6 +6,7 @@ from fastapi import APIRouter, status, UploadFile, Depends
 from starlette.responses import FileResponse
 
 from app.api.dependencies.task_id_depenency import get_task_id
+from app.config import AppConfig, get_config
 from app.schemas.celery_task_schema import (
     CeleryTaskSchema,
     CeleryTaskNoExcelSchema,
@@ -62,12 +63,14 @@ async def upload_file_to_process(
 )
 async def get_processed_file(
     task_id: str,
+    config: AppConfig = Depends(get_config),
 ):
     """
     Endpoint to download a processed Excel file using a given task ID.
 
     Args:
         task_id (str): The unique identifier for the task associated with the Excel file processing.
+        config: An instance of AppConfig class
 
     Returns:
         FileResponse: A response object that represents the processed Excel file, allowing the client to download it.
@@ -93,7 +96,7 @@ async def get_processed_file(
         }
 
     processed_file_path = os.path.join(
-        "processed_excel_files", f"processed_{task_id}.xlsx"
+        config.excel.folder_path, f"processed_{task_id}.xlsx"
     )
     return FileResponse(
         processed_file_path,
