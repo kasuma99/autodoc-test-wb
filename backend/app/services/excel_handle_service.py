@@ -1,5 +1,6 @@
 import os
 import traceback
+from datetime import datetime
 from typing import BinaryIO, Any
 from uuid import UUID
 
@@ -41,6 +42,7 @@ class ExcelHandleService:
         excel_handle_log = self._repo.create(
             model=ExcelHandleLog(
                 uuid=uuid,
+                created_date=datetime.utcnow(),
                 filename=filename,
                 status=status,
                 log=log,
