@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd backend/scripts || exit
+cd backend || exit
 
 python start_celery.py
