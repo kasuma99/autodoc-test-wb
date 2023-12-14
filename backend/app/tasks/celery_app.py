@@ -12,7 +12,7 @@ def configure_redis_url() -> str:
     return broker_url
 
 
-# redis_url = configure_redis_url()
+redis_url = configure_redis_url()
 
 celery_app = Celery(
     main="worker",
