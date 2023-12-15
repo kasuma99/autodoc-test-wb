@@ -32,14 +32,14 @@ class ExcelConfig(BaseSettings):
 
 
 class AppConfig(BaseConfig):
-    db: DbConfig | None
-    redis: RedisConfig | None
-    excel: ExcelConfig | None
+    db: DbConfig
+    redis: RedisConfig
+    excel: ExcelConfig
 
 
 @cache
 def _get_config():
-    return AppConfig(_env_file=[".env"])
+    return AppConfig(_env_file=[".env"])  # type: ignore
 
 
 def get_config():

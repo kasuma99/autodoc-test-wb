@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import BinaryIO, Any
 from uuid import UUID
 
-import pandas as pd
+import pandas as pd  # type: ignore
 
 from app.config import get_config
 from app.db.models.excel_handle_logs import ExcelHandleLog
@@ -73,6 +73,7 @@ class ExcelHandleService:
                 error_type=self._error.UNSUPPORTED_TYPE.value,
             )
             return log
+        return None
 
     def get_log_unreadable(self, file: BinaryIO) -> LogMinor | None:
         try:
@@ -95,6 +96,8 @@ class ExcelHandleService:
             )
             return log
 
+        return None
+
     def get_log_invalid_columns(self, columns: list) -> LogMinor | None:
         # Catch error when columns are not match with EXPECTED COLUMNS
         if not columns == [self._config.column_date, self._config.column_sales]:
@@ -104,6 +107,7 @@ class ExcelHandleService:
                 error_type=ExcelHandleError.INVALID_COLUMNS.value,
             )
             return log
+        return None
 
     def get_log_invalid_date(self, date: Any, index: int) -> LogMinor | None:
         try:
@@ -118,6 +122,8 @@ class ExcelHandleService:
             )
             return log
 
+        return None
+
     def get_log_invalid_sales(self, sales: Any, index: int) -> LogMinor | None:
         # Check if data in Date column is either None or float | int
         if not pd.isna(sales) and not isinstance(sales, (int, float)):
@@ -127,6 +133,7 @@ class ExcelHandleService:
                 error_type=self._error.INVALID_DATA.value,
             )
             return log
+        return None
 
     def validate_and_get_log(
         self, content_type: str, file: BinaryIO
@@ -157,6 +164,8 @@ class ExcelHandleService:
             )
             if log:
                 return log
+
+        return None
 
     def process_file(
         self,

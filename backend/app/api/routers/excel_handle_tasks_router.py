@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from celery.result import AsyncResult
+from celery.result import AsyncResult  # type: ignore
 from fastapi import APIRouter, status, UploadFile, Depends
 from starlette.responses import FileResponse
 

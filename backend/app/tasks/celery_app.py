@@ -1,7 +1,7 @@
 import traceback
 from typing import BinaryIO
 
-from celery import Celery
+from celery import Celery  # type: ignore
 
 from app.config import get_config
 from app.db.session import create_db_session

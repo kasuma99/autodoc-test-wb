@@ -62,9 +62,9 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_db_url(db_config)
+    configuration["sqlalchemy.url"] = get_db_url(db_config)  # type: ignore
     connectable = engine_from_config(
-        configuration,
+        configuration,  # type: ignore
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
