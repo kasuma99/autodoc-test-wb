@@ -42,7 +42,7 @@ Navigate to the project's root directory:
 
 #### 4. Set Up Backend Environment Variables
 
-Navigate to the backend directory, clone the `.env.example` file and rename it to `.env`:
+Navigate to the `backend` directory, clone the `.env.example` file and rename it to `.env`:
 
     cd backend
     cp .env.example .env
@@ -54,6 +54,12 @@ Return to the project's root directory, enter the `scripts` directory and run `s
     cd scripts
     ./start.bat
 
+#### 6. MyPy check
+To check for static types navigate to `backend` directory and run `mypy`:
+
+    cd ..
+    cd backend
+    mypy .
 
 ## Usage Instructions:
 
