@@ -3,7 +3,6 @@ from sqlalchemy.future import Engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import DbConfig, get_config
-from app.db import Base
 
 SessionLocal = sessionmaker()
 
@@ -26,5 +25,4 @@ def db_setup(db_config: DbConfig | None = None):
 
     db_url = get_db_url(db_config=db_config)
     engine = create_engine(url=db_url)
-    Base.metadata.create_all(bind=engine)
     configure_db_session(engine=engine)

@@ -1,38 +1,74 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
-    container_name: db-autodoc
+    container_name: db-app
     image: postgres:16.1-alpine
     ports:
-      - '5431:5432'
+      - "5431:5432"
     env_file:
-      - .env
+      - .env.docker
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   pgadmin:
-    container_name: pgadmin4
+    container_name: pgadmin4-app
     image: dpage/pgadmin4
     ports:
       - "80:80"
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       - db
+
+  redis:
+    container_name: redis-app
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  worker:
+    container_name: celery-app
+    build:
+      context: .
+    env_file:
+      - .env.docker
+    command: ["/app/scripts/celery.sh"]
+    depends_on:
+      - redis
+    volumes:
+      - shared-volume:/app/backend/app/data
 
   app:
     container_name: fastapi-app
     build:
       context: .
     env_file:
-      - .env
-    command: ['/app/scripts/app.sh']
+      - .env.docker
+    command: ["/app/scripts/app.sh"]
     ports:
-      - '8000:8000'
+      - "8000:8000"
     depends_on:
       - db
+      - redis
+      - worker
+    volumes:
+      - shared-volume:/app/backend/app/data
+
+  flower:
+    container_name: flower-app
+    build:
+      context: .
+    env_file:
+      - .env.docker
+    command: ["/app/scripts/flower.sh"]
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - worker
 
 
 volumes:
   postgres-data:
+  shared-volume:

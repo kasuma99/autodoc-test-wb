@@ -1,5 +1,7 @@
 #!/bin/bash
 
-cd backend/app/api || exit
+cd backend || exit
 
-uvicorn main:app --host "0.0.0.0" --port "8000"
+alembic upgrade head
+
+python start_app.py
